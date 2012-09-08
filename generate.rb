@@ -6,10 +6,22 @@ if ARGV.length < 1
   p 'Types are: String, Integer, Text, etc.'
   exit
 end
-model_name = ARGV[0].capitalize
+flags = []
+arguments = []
+
+ARGV.each do |arg|
+  if arg.match(/^--/)
+    flags.push(arg)
+  else
+    arguments.push(arg)
+  end
+
+end
+
+model_name = arguments[0].capitalize
 attributes = {}
-(1...ARGV.length).each do |i|
-  arg = ARGV[i]
+(1...arguments.length).each do |i|
+  arg = arguments[i]
   name, type = arg.split(':')
   attributes[name] = type
 end
@@ -27,12 +39,14 @@ end
 
 model_string += "end\n"
 
+puts "====FILE ./db/migrations/#{model_name}.rb====="
 puts model_string
-
-migration = File.new("./db/migrations/#{model_name}.rb", "w")
-migration.write(model_string)
-migration.close
-
+puts "=============================================="
+unless flags.include? "--dry"
+  migration = File.new("./db/migrations/#{model_name}.rb", "w")
+  migration.write(model_string)
+  migration.close
+end
 
 # Generate the boilerplate rest code for the model
 
@@ -84,11 +98,14 @@ delete "/#{model_name.downcase}/:id" do
 end&
 
 rest_string = get_string + "\n" + post_string + "\n" + get_string_individual + "\n" + put_string + "\n" + delete_string
-
+puts "====FILE ./rest/#{model_name}.rb====="
 puts rest_string
-rest_view = File.new("./rest/#{model_name}.rb", "w")
-rest_view.write(rest_string)
-rest_view.close
+puts "====================================="
+unless flags.include? "--dry"
+  rest_view = File.new("./rest/#{model_name}.rb", "w")
+  rest_view.write(rest_string)
+  rest_view.close
+end
 
 
 # TODO: Generate the boilerplate backbone code
