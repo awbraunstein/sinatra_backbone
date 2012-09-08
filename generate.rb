@@ -89,3 +89,6 @@ puts rest_string
 rest_view = File.new("./rest/#{model_name}.rb", "w")
 rest_view.write(rest_string)
 rest_view.close
+
+
+# TODO: Generate the boilerplate backbone code
